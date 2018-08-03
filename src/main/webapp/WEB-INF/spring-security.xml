@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                          http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
+                          http://www.springframework.org/schema/context
+                          http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<bean id="authenticationManager"
+		class="org.springframework.security.authentication.ProviderManager">
+		<constructor-arg>
+			<list>
+				<ref bean="unpwAuthenticationProvider" />				
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<security:http auto-config="true" use-expressions="true">
+		<security:intercept-url pattern="/**" access="isAuthenticated()" />
+		<security:form-login />
+		<security:logout />
+	</security:http>
+	<security:authentication-manager>
+		<security:authentication-provider ref="unpwAuthenticationProvider"/>
+	</security:authentication-manager>
+
+	<!-- <security:authentication-manager>
+		<security:authentication-provider>
+			<security:user-service>
+				<security:user name="admin" password="adminpassword"
+					authorities="ROLE_USER, ROLE_ADMIN" />
+				<security:user name="user" password="password"
+					authorities="ROLE_USER" />
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager> -->
+	
+		
+	<bean id="springSecurityFilterChainProxy" class="org.springframework.security.web.FilterChainProxy">
+	<security:filter-chain-map request-matcher="ant">
+			<security:filter-chain pattern="/**"
+				filters="httpSessionContextIntegrationFilter,concurrentSessionFilter,authenticationProcessingFilter" />
+		   </security:filter-chain-map>		
+	</bean>
+	
+	<bean id="httpSessionContextIntegrationFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+      <property name="forceEagerSessionCreation"><value>true</value> </property>
+    </bean>
+    
+	<bean id="authenticationProcessingFilter" class="com.mathew.webapplication.controllers.sec.CustomAuthenticationFilter">
+		<property name="authenticationManager">
+			<ref bean="authenticationManager" />
+		</property>
+		<!-- <property name="sessionAuthenticationStrategy" ref="concurrentSessionController" />
+		<property name="authenticationFailureUrl">
+			<value>/login.jsp?login_error=1</value>
+		</property>
+		<property name="authenticationSuccessHandler">
+			<bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/login.jsp?login_success=1" />
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/login.jsp?login_error=1" />
+			</bean>
+		</property>
+		<property name="filterProcessesUrl">
+			<value>/j_spring_security_check</value>
+		</property>
+		<property name="rememberMeServices">
+			<ref bean="rememberMeServices" />
+		</property>
+		<property name="loginHandler">
+			<ref bean="loginHandler" />
+		</property>  -->
+	     
+	</bean>
+
+</beans>
